@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Waste2Wealth AI</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 30px 16px;
+      font-family: Arial, sans-serif;
+      background: #f2f7ed;
+      color: #183c2b;
+    }
+
+    .container {
+      max-width: 760px;
+      margin: auto;
+    }
+
+    header {
+      background: #176b45;
+      color: white;
+      padding: 25px;
+      border-radius: 18px;
+      margin-bottom: 20px;
+    }
+
+    h1 { margin-top: 0; }
+
+    .card {
+      background: white;
+      padding: 22px;
+      border-radius: 16px;
+      margin-bottom: 18px;
+      box-shadow: 0 4px 16px #183c2b0c;
+    }
+
+    label {
+      display: block;
+      margin: 15px 0 7px;
+      font-weight: bold;
+    }
+
+    input, select {
+      box-sizing: border-box;
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ccdccc;
+      border-radius: 9px;
+      background: white;
+    }
+
+    button {
+      width: 100%;
+      padding: 13px;
+      margin-top: 18px;
+      border: 0;
+      border-radius: 9px;
+      background: #176b45;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover { background: #105335; }
+
+    .result {
+      background: #e6f5e8;
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 15px;
+      line-height: 1.7;
+    }
+
+    .note {
+      color: #64756a;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <header>
+      <p>🌱 SMART & SUSTAINABLE AGRICULTURE</p>
+      <h1>Waste2Wealth AI</h1>
+      <p>Turn agricultural waste into valuable resources.</p>
+    </header>
+
+    <section class="card">
+      <h2>🌾 Analyze Your Farm Waste</h2>
+      <p>Enter your residue details to explore possible reuse options.</p>
+
+      <label for="residue">Crop residue</label>
+      <select id="residue">
+        <option value="rice">Rice straw</option>
+        <option value="wheat">Wheat straw</option>
+        <option value="sugarcane">Sugarcane bagasse</option>
+        <option value="husks">Rice husk</option>
+        <option value="leaves">Leaves and plant residue</option>
+        <option value="cotton">Cotton stalks</option>
+      </select>
+
+      <label for="quantity">Quantity (kg)</label>
+      <input id="quantity" type="number" min="1" value="500">
+
+      <label for="transport">Estimated transport cost (₹)</label>
+      <input id="transport" type="number" min="0" value="500">
+
+      <label for="processing">Estimated processing cost (₹)</label>
+      <input id="processing" type="number" min="0" value="300">
+
+      <button onclick="analyzeWaste()">Analyze My Waste</button>
+      <div id="result" aria-live="polite"></div>
+    </section>
+
+    <section class="card">
+      <h2>♻ How It Helps</h2>
+      <p>🌱 Discover potential composting options.</p>
+      <p>🔥 Explore suitable biomass applications.</p>
+      <p>🤝 Identify the types of businesses that may use your residue.</p>
+      <p class="note">
+        This is a prototype. Rates are illustrative examples, not live market
+        prices. Buyer availability must be verified locally.
+      </p>
+    </section>
+  </main>
+
+  <script>
+    const reuseOptions = {
+      rice: {
+        name: "Rice straw",
+        uses: ["Composting", "Biomass feedstock", "Mushroom substrate"],
+        rate: 2.2
+      },
+      wheat: {
+        name: "Wheat straw",
+        uses: ["Mulch or compost", "Baled biomass", "Mushroom substrate"],
+        rate: 2.5
+      },
+      sugarcane: {
+        name: "Sugarcane bagasse",
+        uses: ["Biomass applications", "Compost blends", "Fiber-based products"],
+        rate: 2.4
+      },
+      husks: {
+        name: "Rice husk",
+        uses: ["Suitable biomass uses", "Compost blends", "Material processing"],
+        rate: 2.0
+      },
+      leaves: {
+        name: "Plant residue",
+        uses: ["Composting", "Mulching", "Suitable biomass uses"],
+        rate: 1.4
+      },
+      cotton: {
+        name: "Cotton stalks",
+        uses: ["Biomass feedstock", "Potential material processing", "Soil-use options after assessment"],
+        rate: 2.0
+      }
+    };
+
+    function analyzeWaste() {
+      const type = document.getElementById("residue").value;
+      const quantity = Number(document.getElementById("quantity").value);
+      const transport = Number(document.getElementById("transport").value);
+      const processing = Number(document.getElementById("processing").value);
+      const result = document.getElementById("result");
+
+      if (!Number.isFinite(quantity) || quantity <= 0 ||
+          !Number.isFinite(transport) || transport < 0 ||
+          !Number.isFinite(processing) || processing < 0) {
+        result.innerHTML = "<p>Please enter a valid quantity and non-negative costs.</p>";
+        return;
+      }
+
+      const crop = reuseOptions[type];
+      const estimatedRevenue = quantity * crop.rate;
+      const net = estimatedRevenue - transport - processing;
+      const money = value => "₹" + Math.round(value).toLocaleString("en-IN");
+
+      result.innerHTML = `
+        <div class="result">
+          <h3>🌿 Your Waste Report</h3>
+          <p><b>Residue:</b> ${crop.name}</p>
+          <p><b>Possible reuse options:</b></p>
+          <ul>${crop.uses.map(use => `<li>${use}</li>`).join("")}</ul>
+          <p><b>Illustrative gross value:</b> ${money(estimatedRevenue)}</p>
+          <p><b>Transport cost:</b> ${money(transport)}</p>
+          <p><b>Processing cost:</b> ${money(processing)}</p>
+          <h3>Estimated net return: ${money(net)}</h3>
+          <p class="note">
+            This calculation uses a sample rate of ${money(crop.rate)} per kg.
+            It is not a real buyer offer or guaranteed income. Confirm local
+            prices, material quality, and suitability before making decisions.
+          </p>
+          <button onclick="downloadReport('${type}', ${quantity}, ${estimatedRevenue}, ${transport}, ${processing}, ${net})">
+            Download Report (CSV)
+          </button>
+        </div>
+      `;
+    }
+
+    function downloadReport(type, quantity, revenue, transport, processing, net) {
+      const rows = [
+        ["Waste2Wealth AI - Illustrative Report"],
+        ["Residue", reuseOptions[type].name],
+        ["Quantity (kg)", quantity],
+        ["Estimated gross value (INR)", revenue],
+        ["Transport cost (INR)", transport],
+        ["Processing cost (INR)", processing],
+        ["Estimated net return (INR)", net],
+        ["Disclaimer", "Sample assumptions only; not live market prices."]
+      ];
+
+      const csv = rows.map(row =>
+        row.map(value => '"' + String(value).replace(/"/g, '""') + '"').join(",")
+      ).join("\r\n");
+
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "waste2wealth-report.csv";
+      link.click();
+      URL.revokeObjectURL(url);
+    }
+  </script>
+</body>
+</html>
+<!-- Waste2Wealth AI: Smart Buyer Matching -->
+<section id="buyer-match" style="max-width:900px;margin:30px auto;padding:24px;background:#fff;border-radius:18px;font-family:Arial,sans-serif;color:#17352a">
+  <h2>🤝 Smart Buyer Match</h2>
+  <p>Find potential uses and buyers for your agricultural residue.</p>
+
+  <label for="bm-crop">Crop residue</label>
+  <select id="bm-crop" style="display:block;width:100%;padding:12px;margin:8px 0 16px">
+    <option value="rice">Rice straw</option>
+    <option value="wheat">Wheat straw</option>
+    <option value="sugarcane">Sugarcane bagasse</option>
+    <option value="husks">Rice husk</option>
+    <option value="leaves">Plant leaves</option>
+    <option value="cotton">Cotton stalks</option>
+  </select>
+
+  <label for="bm-quantity">Available quantity (kg)</label>
+  <input id="bm-quantity" type="number" min="1" value="500"
+    style="display:block;width:100%;box-sizing:border-box;padding:12px;margin:8px 0 16px">
+
+  <label for="bm-distance">Estimated distance to buyer (km)</label>
+  <input id="bm-distance" type="number" min="0" value="15"
+    style="display:block;width:100%;box-sizing:border-box;padding:12px;margin:8px 0 16px">
+
+  <button onclick="findWasteBuyers()"
+    style="background:#176b45;color:white;padding:13px 20px;border:0;border-radius:9px;cursor:pointer">
+    Find Best Matches
+  </button>
+
+  <div id="bm-results" aria-live="polite" style="margin-top:20px"></div>
+  <p style="font-size:12px;color:#68776d">
+    Demo listings and rates are illustrative, not verified offers.
+    Confirm current prices and buyer details before making a sale.
+  </p>
+</section>
+
+<script>
+const buyerData = [
+  {
+    name: "GreenRoots Compost",
+    category: "Composting",
+    crops: ["rice", "wheat", "husks", "leaves", "cotton"],
+    min: 100, max: 5000, distance: 12, rate: 2.0,
+    icon: "🌱"
+  },
+  {
+    name: "BioHeat Biomass",
+    category: "Biomass",
+    crops: ["rice", "wheat", "sugarcane", "husks", "cotton"],
+    min: 500, max: 20000, distance: 25, rate: 2.8,
+    icon: "🔥"
+  },
+  {
+    name: "AgriFiber Materials",
+    category: "Material reuse",
+    crops: ["sugarcane", "husks", "cotton"],
+    min: 300, max: 10000, distance: 20, rate: 2.5,
+    icon: "🏭"
+  },
+  {
+    name: "Local Mushroom Growers",
+    category: "Mushroom substrate",
+    crops: ["rice", "wheat"],
+    min: 50, max: 1000, distance: 8, rate: 1.6,
+    icon: "🍄"
+  }
+];
+
+function findWasteBuyers() {
+  const crop = document.getElementById("bm-crop").value;
+  const quantity = Number(document.getElementById("bm-quantity").value);
+  const maxDistance = Number(document.getElementById("bm-distance").value);
+  const output = document.getElementById("bm-results");
+
+  if (!Number.isFinite(quantity) || quantity <= 0 ||
+      !Number.isFinite(maxDistance) || maxDistance < 0) {
+    output.textContent = "Please enter a valid quantity and distance.";
+    return;
+  }
+
+  const matches = buyerData.filter(b =>
+    b.crops.includes(crop) &&
+    quantity >= b.min &&
+    quantity <= b.max &&
+    b.distance <= maxDistance
+  ).sort((a, b) => a.distance - b.distance);
+
+  if (!matches.length) {
+    output.innerHTML = `
+      <div style="padding:18px;background:#fff4df;border-radius:12px">
+        No sample buyers match all your requirements.
+        Try increasing the distance or changing the quantity.
+      </div>`;
+    return;
+  }
+
+  output.innerHTML = `
+    <h3>Potential buyer matches</h3>
+    ${matches.map(b => {
+      const gross = quantity * b.rate;
+      const transport = b.distance * 20;
+      const net = gross - transport;
+
+      return `
+        <article style="border:1px solid #dfe8dd;border-radius:14px;padding:16px;margin:12px 0">
+          <h3>${b.icon} ${b.name}</h3>
+          <p>Category: ${b.category}</p>
+          <p>Illustrative distance: ${b.distance} km</p>
+          <p>Example gross value: ₹${Math.round(gross).toLocaleString("en-IN")}</p>
+          <p>Example transport cost: ₹${transport.toLocaleString("en-IN")}</p>
+          <strong>Amount after transport: ₹${Math.round(net).toLocaleString("en-IN")}</strong>
+          <p style="font-size:12px;color:#68776d">
+            Processing, loading, quality deductions and other costs are excluded.
+            This is not a confirmed buyer offer.
+          </p>
+          <button onclick="copyBuyerEnquiry('${b.name}', '${crop}', ${quantity})"
+            style="background:#176b45;color:white;border:0;padding:10px;border-radius:8px;cursor:pointer">
+            Prepare buyer enquiry
+          </button>
+        </article>`;
+    }).join("")}
+  `;
+}
+
+function copyBuyerEnquiry(name, crop, quantity) {
+  const message =
+    `Hello ${name}, I have ${quantity} kg of ${crop} residue. ` +
+    `Do you currently accept this material? Please confirm your buying ` +
+    `price, quality requirements, collection options and any charges.`;
+
+  const box = document.createElement("textarea");
+  box.value = message;
+  box.style.width = "100%";
+  box.style.marginTop = "12px";
+  box.setAttribute("aria-label", "Buyer enquiry message");
+  document.getElementById("bm-results").appendChild(box);
+  box.focus();
+  box.select();
+
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(message).catch(() => {});
+    }
+  } catch (e) {}
+}
+</script>
+</body>
